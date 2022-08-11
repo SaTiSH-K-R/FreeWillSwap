@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.14;
+pragma solidity 0.8.9;
 
 import "./FreeWillPair.sol";
 import "./interfaces/IWETH.sol";
 
 contract FreeWillSwap {
 
-    mapping(address => mapping(address => address)) public getPair;
-    address[] public allPairs;
+    mapping(address => mapping(address => address)) private _getPair;
+    address[] private allPairs;
 
     address public WETH;
 
@@ -38,6 +38,14 @@ contract FreeWillSwap {
         WETH = _WETH;
     }
 
+    function getPair(address token1, address token2) public view returns (address pair) {
+        pair = _getPair[token1][token2];
+    }
+
+    function getAllPairs() public view returns (address[] memory pairs) {
+        pairs =  allPairs;
+    }
+
     function createPair(address tokenA, address tokenB)
         public
         returns (address)
@@ -45,14 +53,14 @@ contract FreeWillSwap {
         (address token1, address token2) = tokenA < tokenB
             ? (tokenA, tokenB)
             : (tokenB, tokenA);
-        require(token1 != token2, "FreeWillSwap: Same tokens");
+        require(token1 != token2, "Same");
         require(
             token1 != address(0) && token2 != address(0),
-            "FreeWillSwap: Zero address"
+            "0address"
         );
         require(
-            getPair[token1][token2] == address(0),
-            "FreeWillSwap: Pair Exists"
+            _getPair[token1][token2] == address(0),
+            "Exists"
         );
         string memory name1 = IERC20Metadata(token1).symbol();
         string memory name2 = IERC20Metadata(token2).symbol();
@@ -63,8 +71,8 @@ contract FreeWillSwap {
             name
         );
         IFreeWillPair(address(_contract)).initialize(token1, token2);
-        getPair[token1][token2] = address(_contract);
-        getPair[token2][token1] = address(_contract);
+        _getPair[token1][token2] = address(_contract);
+        _getPair[token2][token1] = address(_contract);
         allPairs.push(address(_contract));
         emit PairCreated(address(_contract), token1, token2);
         return address(_contract);
@@ -90,12 +98,12 @@ contract FreeWillSwap {
         )
     {
         uint256 lpTokens;
-        require(amount1 > 0 && amount2 > 0, "Zero amount");
+        require(amount1 > 0 && amount2 > 0, "0amount");
         IFreeWillPair pair;
-        if (getPair[token1][token2] == address(0)) {
+        if (_getPair[token1][token2] == address(0)) {
             pair = IFreeWillPair(createPair(token1, token2));
         } else {
-            pair = IFreeWillPair(getPair[token1][token2]);
+            pair = IFreeWillPair(_getPair[token1][token2]);
         }
         (uint256 reserve1, uint256 reserve2) = pair.getReserves();
         if (reserve1 == 0 && reserve2 == 0) {
@@ -144,7 +152,7 @@ contract FreeWillSwap {
             _amount1,
             _amount2
         );
-        address pairAddress = getPair[token1][token2];
+        address pairAddress = _getPair[token1][token2];
         IFreeWillPair pair = IFreeWillPair(pairAddress);
         IERC20(token1).transferFrom(msg.sender, pairAddress, amount1);
         IERC20(token2).transferFrom(msg.sender, pairAddress, amount2);
@@ -176,7 +184,7 @@ contract FreeWillSwap {
             _amount1,
             _amount2
         );
-        address pairAddress = getPair[token1][token2];
+        address pairAddress = _getPair[token1][token2];
         IFreeWillPair pair = IFreeWillPair(pairAddress);
         (uint256 wethAmount, uint256 tokenAmount) = token1 == WETH
             ? (amount1, amount2)
@@ -193,11 +201,11 @@ contract FreeWillSwap {
         address tokenB,
         uint256 lpTokens
     ) public returns (uint256 amount1, uint256 amount2) {
-        require(lpTokens > 0, "FreeWillSwap: Zero amount");
+        require(lpTokens > 0, "0amount");
         (address token1, address token2) = tokenA < tokenB
             ? (tokenA, tokenB)
             : (tokenB, tokenA);
-        address pairAddress = getPair[token1][token2];
+        address pairAddress = _getPair[token1][token2];
         IFreeWillPair pair = IFreeWillPair(pairAddress);
         (uint256 reserve1, uint256 reserve2) = pair.getReserves();
         uint256 totalLP = IERC20(pairAddress).totalSupply();
@@ -212,11 +220,11 @@ contract FreeWillSwap {
         public
         returns (uint256 amount1, uint256 amount2)
     {
-        require(lpTokens > 0, "FreeWillSwap: Zero amount");
+        require(lpTokens > 0, "0amount");
         (address token1, address token2) = WETH < token
             ? (WETH, token)
             : (token, WETH);
-        address pairAddress = getPair[token1][token2];
+        address pairAddress = _getPair[token1][token2];
         IFreeWillPair pair = IFreeWillPair(pairAddress);
         (uint256 reserve1, uint256 reserve2) = pair.getReserves();
         uint256 totalLP = IERC20(pairAddress).totalSupply();
@@ -231,28 +239,26 @@ contract FreeWillSwap {
         emit LiquidityRemoved(pairAddress);
     }
 
-    // @param tokenA: inputToken address
-    // @param inputAmount: tokens of tokenA
     function swapTokensForTokens(
         address tokenA,
         address tokenB,
         uint256 inputAmount
     ) public returns (uint256 outputAmount) {
         require(
-            getPair[tokenA][tokenB] != address(0),
-            "FreeWillSwap: Pair not exist"
+            _getPair[tokenA][tokenB] != address(0),
+            "Pair!exist"
         );
         require(
             IERC20(tokenA).allowance(msg.sender, address(this)) >= inputAmount,
-            "FreeWillSwap: Insufficient allowance"
+            "!allowance"
         );
         (address token1, address token2) = tokenA < tokenB
             ? (tokenA, tokenB)
             : (tokenB, tokenA);
-        address pairAddress = getPair[token1][token2];
+        address pairAddress = _getPair[token1][token2];
         IFreeWillPair pair = IFreeWillPair(pairAddress);
         (uint256 reserve1, uint256 reserve2) = pair.getReserves();
-        require(reserve1 > 0 && reserve2 > 0, "FreeWillSwap: No liquidity");
+        require(reserve1 > 0 && reserve2 > 0, "NoLiquidity");
         if (tokenA == token1) {
             outputAmount = getOutputAmount(inputAmount, reserve1, reserve2);
             IERC20(token1).transferFrom(msg.sender, pairAddress, inputAmount);
@@ -278,20 +284,20 @@ contract FreeWillSwap {
         returns (uint256 outputAmount)
     {
         require(
-            getPair[token][WETH] != address(0),
-            "FreeWillSwap: Pair not exist"
+            _getPair[token][WETH] != address(0),
+            "Pair!exist"
         );
         require(
             IERC20(token).allowance(msg.sender, address(this)) >= inputAmount,
-            "FreeWillSwap: Insufficient allowance"
+            "!allowance"
         );
         (address token1, address token2) = token < WETH
             ? (token, WETH)
             : (WETH, token);
-        address pairAddress = getPair[token1][token2];
+        address pairAddress = _getPair[token1][token2];
         IFreeWillPair pair = IFreeWillPair(pairAddress);
         (uint256 reserve1, uint256 reserve2) = pair.getReserves();
-        require(reserve1 > 0 && reserve2 > 0, "FreeWillSwap: No liquidity");
+        require(reserve1 > 0 && reserve2 > 0, "NoLiquidity");
         if (token1 == token) {
             outputAmount = getOutputAmount(inputAmount, reserve1, reserve2);
             IERC20(token1).transferFrom(msg.sender, pairAddress, inputAmount);
@@ -320,16 +326,16 @@ contract FreeWillSwap {
         returns (uint256 outputAmount)
     {
         require(
-            getPair[token][WETH] != address(0),
-            "FreeWillSwap: Pair not exist"
+            _getPair[token][WETH] != address(0),
+            "Pair!exist"
         );
         (address token1, address token2) = token < WETH
             ? (token, WETH)
             : (WETH, token);
-        address pairAddress = getPair[token1][token2];
+        address pairAddress = _getPair[token1][token2];
         IFreeWillPair pair = IFreeWillPair(pairAddress);
         (uint256 reserve1, uint256 reserve2) = pair.getReserves();
-        require(reserve1 > 0 && reserve2 > 0, "FreeWillSwap: No liquidity");
+        require(reserve1 > 0 && reserve2 > 0, "NoLiquidity");
         uint256 inputAmount = msg.value;
         if (token1 == WETH) {
             outputAmount = getOutputAmount(inputAmount, reserve1, reserve2);
@@ -370,8 +376,8 @@ contract FreeWillSwap {
         (address token1, address token2) = FUSD < token
             ? (FUSD, token)
             : (token, FUSD);
-        address pairAddress = getPair[token1][token2];
-        require(pairAddress != address(0), "Pair not exist");
+        address pairAddress = _getPair[token1][token2];
+        require(pairAddress != address(0), "Pair!exist");
         IFreeWillPair pair = IFreeWillPair(pairAddress);
         (uint256 reserve1, uint256 reserve2) = pair.getReserves();
         if (token1 == FUSD) {
@@ -385,8 +391,8 @@ contract FreeWillSwap {
         (address token1, address token2) = FUSD < WETH
             ? (FUSD, WETH)
             : (WETH, FUSD);
-        address pairAddress = getPair[token1][token2];
-        require(pairAddress != address(0), "Pair not exist");
+        address pairAddress = _getPair[token1][token2];
+        require(pairAddress != address(0), "Pair !exist");
         IFreeWillPair pair = IFreeWillPair(pairAddress);
         (uint256 reserve1, uint256 reserve2) = pair.getReserves();
         if (token1 == FUSD) {
