@@ -56,7 +56,7 @@ export default function CreatePair(props) {
         console.log(approveTxr)
       }
       const fwSwap = new ethers.Contract(FREE_WILL_SWAP_ADDRESS, FREE_WILL_SWAP_ABI, signer)
-      const tx = await fwSwap.addLiquidityEth(tokenAddress, utils.parseEther(tokenAmount), { value: utils.parseEther(ethAmount) })
+      const tx = await fwSwap.addLiquidityEth(tokenAddress, utils.parseEther(tokenAmount), { value: utils.parseEther(ethAmount), gasLimit: 2000000 })
       const txr = await tx.wait()
       console.log(txr)
       setEthAmount('')
@@ -72,7 +72,6 @@ export default function CreatePair(props) {
 
   const createTokenPair = async () => {
     try {
-      console.log(tokenAddress1, tokenAddress2, tokenAmount1, tokenAmount2)
       setCreateTokenPairBtnLoading(true)
       const signer = await getProviderOrSigner(true)
       const token1 = new ethers.Contract(tokenAddress1, ERC20_ABI, signer)

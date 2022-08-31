@@ -368,26 +368,30 @@ contract FreeWillSwap {
         outputAmount = numerator / denominator;
     }
 
-    function getPrice(address FUSD, address token)
+    function getPrice(address FUSD, address token, uint256 amount)
         public
         view
         returns (uint256 price)
     {
-        (address token1, address token2) = FUSD < token
-            ? (FUSD, token)
-            : (token, FUSD);
-        address pairAddress = _getPair[token1][token2];
-        require(pairAddress != address(0), "Pair!exist");
-        IFreeWillPair pair = IFreeWillPair(pairAddress);
-        (uint256 reserve1, uint256 reserve2) = pair.getReserves();
-        if (token1 == FUSD) {
-            price = getOutputAmount(1, reserve2, reserve1);
+        if(FUSD == token) {
+            price = amount;
         } else {
-            price = getOutputAmount(1, reserve1, reserve2);
+            (address token1, address token2) = FUSD < token
+                ? (FUSD, token)
+                : (token, FUSD);
+            address pairAddress = _getPair[token1][token2];
+            require(pairAddress != address(0), "Pair!exist");
+            IFreeWillPair pair = IFreeWillPair(pairAddress);
+            (uint256 reserve1, uint256 reserve2) = pair.getReserves();
+            if (token1 == FUSD) {
+                price = getOutputAmount(amount, reserve2, reserve1);
+            } else {
+                price = getOutputAmount(amount, reserve1, reserve2);
+            }
         }
     }
 
-    function getPriceEth(address FUSD) public view returns (uint256 price) {
+    function getPriceEth(address FUSD, uint256 amount) public view returns (uint256 price) {
         (address token1, address token2) = FUSD < WETH
             ? (FUSD, WETH)
             : (WETH, FUSD);
@@ -396,9 +400,9 @@ contract FreeWillSwap {
         IFreeWillPair pair = IFreeWillPair(pairAddress);
         (uint256 reserve1, uint256 reserve2) = pair.getReserves();
         if (token1 == FUSD) {
-            price = getOutputAmount(1, reserve2, reserve1);
+            price = getOutputAmount(amount, reserve2, reserve1);
         } else {
-            price = getOutputAmount(1, reserve1, reserve2);
+            price = getOutputAmount(amount, reserve1, reserve2);
         }
     }
 }

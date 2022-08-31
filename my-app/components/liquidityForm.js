@@ -25,7 +25,6 @@ export const LiquidityForm = (props) => {
     const poolContract = new ethers.Contract(pool.poolAddress, FREE_WILL_PAIR_ABI, provider)
     const _lpBalance = await poolContract.balanceOf(provider.provider.selectedAddress)
     setLpBalance(_lpBalance)
-    console.log("LP::", _lpBalance)
   }
 
   const addLiquidity = async () => {
@@ -103,10 +102,8 @@ export const LiquidityForm = (props) => {
     if(lpAmount === '' || lpAmount == '0') {
       return
     }
-    console.log(`${lpBalance.toString()} < ${utils.parseEther(lpAmount).toString()}`, lpBalance.lt(utils.parseEther(lpAmount)))
     if(lpBalance.lt(utils.parseEther(lpAmount))) {
-      console.log(lpAmount, utils.formatEther(lpBalance))
-      console.log("Insufficient LP")
+      window.alert("Insufficient LP tokens")
       return
     }
     setRemoveLiquidityBtnLoading(true)
@@ -155,7 +152,7 @@ export const LiquidityForm = (props) => {
       </Typography>
       <Grid
         container
-        columns={{ xs: 12, sm: 5, md: 5 }}
+        columns={{ xs: 12, sm: 5}}
         direction="row"
         alignItems="stretch"
       >

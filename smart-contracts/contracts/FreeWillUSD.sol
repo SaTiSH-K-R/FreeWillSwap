@@ -8,7 +8,7 @@ contract FreeWillUSD is ERC20, Ownable {
 
     bool public isStableToken = true;
 
-    constructor() ERC20("FreeWillUSD", "FUSD") {
+    constructor() ERC20("FreeWill USD", "FUSD") {
         _mint(_msgSender(), 1000000 * (10 ** 18));
     }
 

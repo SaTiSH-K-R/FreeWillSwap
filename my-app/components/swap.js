@@ -22,7 +22,7 @@ export function Swap(props) {
   const [tokenTo, setTokenTo] = useState({
     name: 'FreeWill USD',
     symbol: 'FUSD',
-    address: '0x1A9D899b052FeD0E273a4392383A0F82e8c7441A'
+    address: '0x9c37763Ec6Cf0E9C6a3Ff6312763a831EE97C4A7'
   })
   const [inputAmount, setInputAmount] = useState('')
   const [outputAmount, setOutputAmount] = useState('')
@@ -112,9 +112,7 @@ export function Swap(props) {
       let isInputAndToken1Same
       if(tokenFrom.address === 'ETH') {
         const pairAddress = await fwSwap.getPair(WETH_ADDRESS, tokenTo.address)
-        console.log(pairAddress)
         const pairContract = new ethers.Contract(pairAddress, FREE_WILL_PAIR_ABI, provider)
-        console.log(pairContract)
         const [ reserveA, reserveB ] = await pairContract.getReserves()
         reserve1 = reserveA
         reserve2 = reserveB
@@ -126,7 +124,6 @@ export function Swap(props) {
         }
       } else if(tokenTo.address === 'ETH') {
         const pairAddress = await fwSwap.getPair(WETH_ADDRESS, tokenFrom.address)
-        console.log(pairAddress)
         const pairContract = new ethers.Contract(pairAddress, FREE_WILL_PAIR_ABI, provider)
         const [ reserveA, reserveB ] = await pairContract.getReserves()
         reserve1 = reserveA
@@ -166,8 +163,6 @@ export function Swap(props) {
       setPriceToken1PerToken2(price1)
       setPriceToken2PerToken1(price2)
       setShowPrice(true)
-      console.log(price1,  tokenFrom.symbol, "per", tokenTo.symbol)
-      console.log(price2, tokenTo.symbol, "per", tokenFrom.symbol)
     } catch(error) {
       console.log(error)
     }

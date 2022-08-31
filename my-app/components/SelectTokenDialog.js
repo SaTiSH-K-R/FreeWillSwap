@@ -1,5 +1,6 @@
 import { Dialog, DialogTitle, Divider, List, ListItem, ListItemButton, ListItemText } from "@mui/material"
 import PropTypes from 'prop-types'
+import { FUSD_ADDRESS, FWT_ADDRESS } from "../constants";
 
 SelectTokenDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
@@ -20,12 +21,12 @@ export function SelectTokenDialog(props) {
     {
       name: 'FreeWill USD',
       symbol: 'FUSD',
-      address: '0x1A9D899b052FeD0E273a4392383A0F82e8c7441A'
+      address: FUSD_ADDRESS
     },
     {
       name: 'FreeWill Token',
       symbol: 'FWT',
-      address: '0x6a452177837ed4Cb4734D3F1426735F36Ba8BeBC'
+      address: FWT_ADDRESS
     }
   ]
 

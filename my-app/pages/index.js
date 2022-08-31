@@ -4,7 +4,7 @@ import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import { Liquidity } from "../components/liquidity"
 import { Swap } from "../components/swap"
-import { Stack } from "@mui/material"
+import { Stack, Typography } from "@mui/material"
 
 export default function Home() {
 
@@ -22,6 +22,15 @@ export default function Home() {
   return (
     <div>
       <Header _setAccount={_setAccount}/>
+      <Stack alignItems='center'>
+        <Typography
+          variant='h4'
+          mt={4}
+          sx={{ color: '#319AEB', display: {xs: 'block', md: 'none'} }}
+        >
+          FreeWill Finance
+        </Typography>
+      </Stack>
       <Stack
         mt={4}
         direction="column"
@@ -45,8 +54,6 @@ export default function Home() {
           :
             <Swap account={account}/>
         }
-        
-
       </Stack>
     </div>
   )

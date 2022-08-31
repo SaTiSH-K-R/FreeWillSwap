@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react"
-import { Button, Divider, Grid, InputBase, Paper, Stack, Typography } from "@mui/material"
-import LoadingButton from '@mui/lab/LoadingButton'
-import { ethers, utils, BigNumber } from "ethers"
+import { Grid, Typography } from "@mui/material"
+import { ethers } from "ethers"
 import CreatePair from "./createPair"
 import { getProviderOrSigner } from "../helpers/wallet"
 import { ERC20_ABI, FREE_WILL_PAIR_ABI, FREE_WILL_SWAP_ABI, FREE_WILL_SWAP_ADDRESS, WETH_ADDRESS } from "../constants"
@@ -53,7 +52,6 @@ export function Liquidity() {
       })
     }
     setPools(_pools)
-    console.log(_pools)
   }
   
   return(
@@ -62,7 +60,6 @@ export function Liquidity() {
       <CreatePair getPools={getPools}/>
       <Grid
         container
-        spacing={2}
         columns={{ xs: 12, sm: 12, md: 12, lg: 6 }}
         direction="row"
         justifyContent="center"

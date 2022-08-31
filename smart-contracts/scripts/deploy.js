@@ -10,9 +10,17 @@ async function main() {
   const freeWillUSD = await FreeWillUSD.deploy()
   await freeWillUSD.deployed()
   console.log("FUSD:: ", freeWillUSD.address)
-  const freeWillSwap = await FreeWillSwap.deploy('0x2f2874A1941Ca9CE282c7a32eBB291eAa916CE36')
+  const freeWillSwap = await FreeWillSwap.deploy(weth.address)
   await freeWillSwap.deployed()
-  console.log("FreeWillSwap", freeWillSwap.address)
+  console.log("FreeWillSwap:: ", freeWillSwap.address)
+
+  //adding ETH/FUSD liquidity
+  // const approveTx = await freeWillUSD.approve(freeWillSwap.address, ethers.utils.parseEther('200000'))
+  // await approveTx.wait()
+  // const tx = await freeWillSwap.addLiquidityEth(freeWillUSD.address, ethers.utils.parseEther('100000'), {value: ethers.utils.parseEther('100')})
+  // const txr = await tx.wait()
+  // console.log(txr)
+
 }
 
 main().catch((error) => {
